@@ -1,17 +1,18 @@
-# Kröhnkite-i3
+# Krohnkite-i3
 
-A dynamic tiling extension for KWin 6 only.
+A dynamic tiling script for KWin 6 and KDE Plasma 6.
 
-Krohnkite-i3 is a fork of [Kröhnkite](https://codeberg.org/anametologin/Krohnkite) that specifically implements i3 style tiling
-to the KDE plasma desktop environment.
+Krohnkite-i3 is an independent fork of [Kröhnkite](https://codeberg.org/anametologin/Krohnkite), focused on i3-style tiling for the KDE Plasma desktop. It retains the original project's MIT license and notices; see [LICENSE](LICENSE).
+
+This fork currently uses the KWin package ID `krohnkite`, so installing it updates/replaces an installation of the original Kröhnkite script. The fork and original cannot be installed side by side under that ID.
 
 ![screenshot](./img/output.gif)
 
-The main motivation for this fork came from the fact that there was no other tiler which could provide i3 style tiling inside of KDE Plasma other than just hacking out kwin and replacing it with i3 under X11 sessions which broke a lot of window management features. 
+The goal is to provide i3-style tiling inside KDE Plasma without replacing KWin with i3, preserving Plasma and KWin window-management features.
 
-Krohnkite by [anametologin](https://codeberg.org/anametologin) did come close, however it only supported layouts of other tiling window managers (dwm, bspwm). The reason why I went out of my way to delete a lot of other layouts by krohnkite was to make it easier for me to navigate through the project and built up on it. 
+The original Kröhnkite project supports layouts inspired by other tiling window managers. This fork narrows its scope to make i3-style behavior easier to develop and maintain.
 
-If you require the other layouts, then it would be better to revert back to anametologin's Krohnkite.
+For the original project's layouts and development, visit [anametologin/Kröhnkite](https://codeberg.org/anametologin/Krohnkite). This fork is maintained separately; changes here are not automatically part of the original project.
 
 ## Features
 
@@ -22,22 +23,24 @@ If you require the other layouts, then it would be better to revert back to anam
   - [ ] stack
   - [ ] tabbed
 
-## Development Requirement
+## Development requirements
 
-- Typescript (see package.json)
+- Node.js and npm
+- TypeScript (installed through `package.json`)
 - [go-task](https://github.com/go-task/task)
-- p7zip (7z)
+- p7zip (the `7z` command)
+- KDE Plasma 6 / KWin 6 for installing and testing the script
 
-## Look at me
+## Troubleshooting
 
-1. If you change the Krohnkite co nfiguration, you will need to reboot. Do not toggle the script on and off, this will start multiple instances of it.
-2. Delete unused KWin shortcuts you can use any D-Bus program which can invoke D-Bus methods. Service name -`org.kde.kglobalaccel` path - `/component/kwin` method - `org.kde.kglobalaccel.Component.cleanUp`. ArchLinux example:
+1. Reboot after changing the Krohnkite configuration. Do not repeatedly toggle the script off and on, as this may start multiple instances.
+2. To remove unused KWin shortcuts, invoke the D-Bus cleanup method. Service name: `org.kde.kglobalaccel`; path: `/component/kwin`; method: `org.kde.kglobalaccel.Component.cleanUp`. Arch Linux example:
 
 ```
 qdbus6 org.kde.kglobalaccel /component/kwin org.kde.kglobalaccel.Component.cleanUp
 ```
 
-3. If you have a gap or vice versa you have gray(white etc) rectangle that means that there is a program with size 1x1 that have to be filtered by title or other ways. Make sure that the following programs, if you have them, have been added to the filter:
+3. If you see unexpected gaps or gray/white rectangles, a 1x1 window may need to be filtered by title or another window property. If present, add these programs to the filter:
 
 ```
 xwaylandvideobridge,plasmashell,ksplashqml
@@ -84,24 +87,27 @@ kpackagetool6 -t KWin/Script -r krohnkite
 
 ### Installing from Git repository
 
-Make sure you have [go-task](https://taskfile.dev/installation/), [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) and [7-zip](https://www.7-zip.org/download.html) packages installed. All packages after building will be in `builds` folder.
-The simplest method to automatically build and install kwinscript package would be:
+Install [go-task](https://taskfile.dev/installation/), [Node.js/npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm), and [7-Zip](https://www.7-zip.org/download.html). The build creates `.kwinscript` packages in `builds/`.
+
+Build and install the script into the current KDE user:
 
 ```
- go-task install
+go-task install
 ```
 
-You can also build `.kwinscript` package file using:
+To build a package without installing it:
 
 ```
 go-task package
 ```
 
-uninstall package:
+To remove the installed script:
 
 ```
 go-task uninstall
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for fork maintenance, syncing with the original project, and submitting changes.
 
 ## Settings
 

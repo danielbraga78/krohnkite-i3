@@ -100,10 +100,6 @@ class TilingController {
   }
 
   public onWindowResize(ctx: IDriverContext, window: WindowClass): void {
-    if (window.state === WindowState.Tiled) {
-      this.engine.adjustLayout(window);
-      this.engine.arrange(ctx, "onWindowResize");
-    }
   }
 
   public onWindowResizeOver(ctx: IDriverContext, window: WindowClass): void {
@@ -187,16 +183,16 @@ class TilingController {
         break;
 
       case Shortcut.GrowWidth:
-        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "east", 1);
+        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "east", 1, ctx);
         break;
       case Shortcut.ShrinkWidth:
-        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "east", -1);
+        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "west", 1, ctx);
         break;
       case Shortcut.GrowHeight:
-        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "south", 1);
+        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "south", 1, ctx);
         break;
       case Shortcut.ShrinkHeight:
-        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "south", -1);
+        if (ctx.currentWindow) this.engine.resizeWindow(ctx.currentWindow, "north", 1, ctx);
         break;
 
       case Shortcut.ShiftUp:

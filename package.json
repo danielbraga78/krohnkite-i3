@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anametologin/krohnkite"
+    "url": "git+https://github.com/sortedcord/krohnkite-i3.git"
   },
   "author": "Eon S. Jeon <esjeon@hyunmu.am>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/anametologin/krohnkite/issues"
+    "url": "https://github.com/sortedcord/krohnkite-i3/issues"
   },
-  "homepage": "https://github.com/anametologin/krohnkite#readme"
+  "homepage": "https://github.com/sortedcord/krohnkite-i3#readme"
 }

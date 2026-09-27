@@ -76,23 +76,30 @@ class TilingEngine {
     dir: "east" | "west" | "south" | "north",
     step: -1 | 1,
   ) {
-    // Delegate to layout.handleShortcut or just assume layout handles geometry updates on apply?
-    // TreeLayout doesn't implement 'adjust' yet, but 'handleShortcut' might be better for keyboard resizing.
-    // But this function is called by shortcuts.
-
-    // For now, let's leave it no-op or todo, as explicit resize logic in TreeLayout is complex 
-    // and usually handled by tree manipulation methods (expand/shrink split).
+    const srf = basis.surface;
+    const gaps = this.getGaps(srf);
+    const area = srf.workingArea.gap(
+      gaps.left,
+      gaps.right,
+      gaps.top,
+      gaps.bottom,
+    );
+    const layout = this.layouts.getCurrentLayout(srf);
+    layout.resize?.(basis, dir, step, area, gaps.between);
   }
 
   public resizeWindow(
     window: WindowClass,
     dir: "east" | "west" | "south" | "north",
     step: -1 | 1,
+    ctx?: IDriverContext,
   ) {
     const state = window.state;
     if (WindowClass.isFloatingState(state)) this.resizeFloat(window, dir, step);
-    else if (WindowClass.isTiledState(state))
+    else if (WindowClass.isTiledState(state)) {
       this.resizeTile(window, dir, step);
+      if (ctx) this.arrange(ctx, "resizeWindow");
+    }
   }
 
   public arrange(ctx: IDriverContext, reason: string) {

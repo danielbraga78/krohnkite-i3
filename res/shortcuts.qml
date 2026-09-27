@@ -124,7 +124,7 @@ Item {
 
         name: "KrohnkiteGrowHeight";
         text: "Krohnkite: Grow Height";
-        sequence: "Meta+Ctrl+J";
+        sequence: "Ctrl+Down";
     }
     function getShrinkHeight() {
         return shrinkHeight;
@@ -134,7 +134,7 @@ Item {
 
         name: "KrohnkiteShrinkHeight";
         text: "Krohnkite: Shrink Height";
-        sequence: "Meta+Ctrl+K";
+        sequence: "Ctrl+Up";
     }
     function getShrinkWidth() {
         return shrinkWidth;
@@ -144,7 +144,7 @@ Item {
 
         name: "KrohnkiteShrinkWidth";
         text: "Krohnkite: Shrink Width";
-        sequence: "Meta+Ctrl+H";
+        sequence: "Ctrl+Left";
     }
     function getGrowWidth() {
         return growWidth;
@@ -154,7 +154,7 @@ Item {
 
         name: "KrohnkitegrowWidth";
         text: "Krohnkite: Grow Width";
-        sequence: "Meta+Ctrl+L";
+        sequence: "Ctrl+Right";
     }
     function getToggleFloat() {
         return toggleFloat;

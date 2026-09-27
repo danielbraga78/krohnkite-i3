@@ -9,7 +9,8 @@ class TreeNode {
   public children: TreeNode[] = [];
   public windowID: string | null = null;
   public splitType: "horizontal" | "vertical" = "horizontal";
-  public splitRatio: number = 0.5;
+  public splitWeights: number[] | null = null;
+  public lastGeometry: Rect | null = null;
 
   constructor() { }
 
@@ -76,6 +77,59 @@ class BinaryTreeLayout implements ILayout {
     if (this.root) {
       this.applyNode(this.root, area, gap, tileables);
     }
+  }
+
+  public adjust(
+    area: Rect,
+    tiles: WindowClass[],
+    basis: WindowClass,
+    delta: RectDelta,
+    gap: number,
+  ): void {
+    const path = this.findPath(this.root, basis.id);
+    if (!path) return;
+
+    this.adjustEdge(path, "horizontal", delta.east, area, gap, false);
+    this.adjustEdge(path, "horizontal", -delta.west, area, gap, true);
+    this.adjustEdge(path, "vertical", delta.south, area, gap, false);
+    this.adjustEdge(path, "vertical", -delta.north, area, gap, true);
+  }
+
+  public resize(
+    basis: WindowClass,
+    direction: "east" | "west" | "south" | "north",
+    step: -1 | 1,
+    area: Rect,
+    gap: number,
+  ): boolean {
+    const path = this.findPath(this.root, basis.id);
+    if (!path) return false;
+
+    const horizontal = direction === "east" || direction === "west";
+    const preferBefore = direction === "west" || direction === "north";
+    const growStep = preferBefore ? -step : step;
+    for (let pathIndex = path.length - 2; pathIndex >= 0; pathIndex--) {
+      const parent = path[pathIndex];
+      const branch = path[pathIndex + 1];
+      if ((parent.splitType === "horizontal") !== horizontal) continue;
+
+      const childIndex = parent.children.indexOf(branch);
+      const preferredBoundary = preferBefore ? childIndex - 1 : childIndex;
+      const fallbackBoundary = preferBefore ? childIndex : childIndex - 1;
+      const boundary = this.isValidBoundary(parent, preferredBoundary)
+        ? preferredBoundary
+        : fallbackBoundary;
+      if (!this.isValidBoundary(parent, boundary)) continue;
+
+      const parentGeometry = parent.lastGeometry || area;
+      const dimension = horizontal ? parentGeometry.width : parentGeometry.height;
+      const available = dimension - gap * (parent.children.length - 1);
+      const basisAfterBoundary = boundary === childIndex - 1;
+      const boundaryStep = basisAfterBoundary ? -growStep : growStep;
+      this.moveBoundary(parent, boundary, dimension * 0.05 * boundaryStep, available);
+      return true;
+    }
+    return false;
   }
 
   private reconcile(ctx: EngineContext, tileables: WindowClass[]): void {
@@ -166,6 +220,76 @@ class BinaryTreeLayout implements ILayout {
     return null;
   }
 
+  private findPath(
+    node: TreeNode | null,
+    windowID: string,
+    path: TreeNode[] = [],
+  ): TreeNode[] | null {
+    if (!node) return null;
+    const currentPath = [...path, node];
+    if (node.windowID === windowID) return currentPath;
+    for (const child of node.children) {
+      const found = this.findPath(child, windowID, currentPath);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  private adjustEdge(
+    path: TreeNode[],
+    splitType: "horizontal" | "vertical",
+    amount: number,
+    area: Rect,
+    gap: number,
+    before: boolean,
+  ): void {
+    if (amount === 0) return;
+    for (let pathIndex = path.length - 2; pathIndex >= 0; pathIndex--) {
+      const parent = path[pathIndex];
+      if (parent.splitType !== splitType) continue;
+      const childIndex = parent.children.indexOf(path[pathIndex + 1]);
+      const boundary = before ? childIndex - 1 : childIndex;
+      if (!this.isValidBoundary(parent, boundary)) continue;
+
+      const parentGeometry = parent.lastGeometry || area;
+      const dimension = splitType === "horizontal"
+        ? parentGeometry.width
+        : parentGeometry.height;
+      const available = dimension - gap * (parent.children.length - 1);
+      this.moveBoundary(parent, boundary, amount, available);
+      return;
+    }
+  }
+
+  private isValidBoundary(parent: TreeNode, boundary: number): boolean {
+    return boundary >= 0 && boundary < parent.children.length - 1;
+  }
+
+  private moveBoundary(
+    parent: TreeNode,
+    boundary: number,
+    amount: number,
+    available: number,
+  ): void {
+    if (available <= 0) return;
+    const weights = this.getSplitWeights(parent);
+    const change = amount / available;
+    const minimum = 0.03;
+    const adjusted = Math.max(
+      minimum - weights[boundary],
+      Math.min(change, weights[boundary + 1] - minimum),
+    );
+    weights[boundary] += adjusted;
+    weights[boundary + 1] -= adjusted;
+  }
+
+  private getSplitWeights(node: TreeNode): number[] {
+    if (!node.splitWeights || node.splitWeights.length !== node.children.length) {
+      node.splitWeights = node.children.map(() => 1 / node.children.length);
+    }
+    return node.splitWeights;
+  }
+
   private insertWindow(ctx: EngineContext, tileable: WindowClass, contextTileables: WindowClass[]): void {
     const newNode = new TreeNode();
     newNode.windowID = tileable.id;
@@ -175,9 +299,45 @@ class BinaryTreeLayout implements ILayout {
       return;
     }
 
-    // insert relative to focused window
-    const currentWin = ctx.currentWindow;
     let targetNode: TreeNode | null = null;
+    let cursorSplit: {
+      splitType: "horizontal" | "vertical";
+      before: boolean;
+    } | null = null;
+
+    const cursorPos = ctx.cursorPos;
+    if (cursorPos) {
+      const hoveredWindow = contextTileables.find((window) => {
+        if (window === tileable) return false;
+        const geometry = window.geometry;
+        return (
+          cursorPos[0] >= geometry.x &&
+          cursorPos[0] <= geometry.maxX &&
+          cursorPos[1] >= geometry.y &&
+          cursorPos[1] <= geometry.maxY
+        );
+      });
+
+      if (hoveredWindow) {
+        targetNode = this.findNode(this.root, hoveredWindow.id);
+        const geometry = hoveredWindow.geometry;
+        const horizontalOffset = Math.abs(
+          (cursorPos[0] - geometry.x) / geometry.width - 0.5,
+        );
+        const verticalOffset = Math.abs(
+          (cursorPos[1] - geometry.y) / geometry.height - 0.5,
+        );
+        const splitType = horizontalOffset >= verticalOffset
+          ? "horizontal"
+          : "vertical";
+        cursorSplit = {
+          splitType,
+          before: splitType === "horizontal"
+            ? cursorPos[0] < geometry.x + geometry.width / 2
+            : cursorPos[1] < geometry.y + geometry.height / 2,
+        };
+      }
+    }
 
     // check tree for max timestamp to find insertion point
     if (!targetNode && this.root) {
@@ -235,6 +395,16 @@ class BinaryTreeLayout implements ILayout {
       return;
     }
 
+    if (cursorSplit) {
+      this.insertBeside(
+        targetNode,
+        newNode,
+        cursorSplit.splitType,
+        cursorSplit.before,
+      );
+      return;
+    }
+
     if (parent) {
       // add as sibling
       const index = parent.children.indexOf(targetNode);
@@ -254,7 +424,41 @@ class BinaryTreeLayout implements ILayout {
     }
   }
 
+  private insertBeside(
+    targetNode: TreeNode,
+    newNode: TreeNode,
+    splitType: "horizontal" | "vertical",
+    before: boolean,
+  ): void {
+    const parent = targetNode.parent;
+    if (parent && parent.splitType === splitType) {
+      const targetIndex = parent.children.indexOf(targetNode);
+      const weights = [...this.getSplitWeights(parent)];
+      const targetWeight = weights[targetIndex];
+      weights[targetIndex] = targetWeight / 2;
+      const insertIndex = before ? targetIndex : targetIndex + 1;
+      weights.splice(insertIndex, 0, targetWeight / 2);
+      parent.splitWeights = weights;
+      parent.addChild(newNode, insertIndex);
+      return;
+    }
+
+    const container = new TreeNode();
+    container.splitType = splitType;
+    if (parent) parent.replaceChild(targetNode, container);
+    else this.root = container;
+
+    if (before) {
+      container.addChild(newNode);
+      container.addChild(targetNode);
+    } else {
+      container.addChild(targetNode);
+      container.addChild(newNode);
+    }
+  }
+
   private applyNode(node: TreeNode, area: Rect, gap: number, tileables: WindowClass[]): void {
+    node.lastGeometry = area.clone();
     if (node.isLeaf) {
       if (node.windowID) {
         const win = tileables.find(w => w.id === node.windowID);
@@ -275,15 +479,16 @@ class BinaryTreeLayout implements ILayout {
       const count = node.children.length;
       const totalGap = (count - 1) * gap;
       const availableSize = (isHorizontal ? area.width : area.height) - totalGap;
-      const unitSize = Math.floor(availableSize / count);
+      const weights = this.getSplitWeights(node);
+      let allocatedSize = 0;
 
       let currentPos = isHorizontal ? area.x : area.y;
 
       node.children.forEach((child, i) => {
-        // last child gets remaining space to avoid rounding gaps
-        const mySize = (i === count - 1)
-          ? ((isHorizontal ? area.width : area.height) - (currentPos - (isHorizontal ? area.x : area.y)))
-          : unitSize;
+        const mySize = i === count - 1
+          ? availableSize - allocatedSize
+          : Math.floor(availableSize * weights[i]);
+        allocatedSize += mySize;
 
         const myRect = new Rect(
           isHorizontal ? currentPos : area.x,

@@ -281,6 +281,13 @@ interface ILayout {
     gap: number,
   ): void;
   handleShortcut?(ctx: EngineContext, input: Shortcut, data?: any): boolean;
+  resize?(
+    basis: WindowClass,
+    direction: "east" | "west" | "south" | "north",
+    step: -1 | 1,
+    area: Rect,
+    gap: number,
+  ): boolean;
   drag?(
     ctx: EngineContext,
     draggingRect: Rect,

@@ -36,10 +36,10 @@ class KWinConfig implements IConfig {
 
     constructor() {
         // Hardcoded defaults for minimal setup
-        this.screenGapTop = 0;
-        this.screenGapBottom = 0;
-        this.screenGapLeft = 0;
-        this.screenGapRight = 0;
+        this.screenGapTop = 45;
+        this.screenGapBottom = 65;
+        this.screenGapLeft = 30;
+        this.screenGapRight = 30;
         this.screenGapBetween = 0;
         this.movePointerOnFocus = false;
         this.defaultSplitOrientation = 'horizontal';
