@@ -16,10 +16,10 @@ For the original project's layouts and development, visit [anametologin/Kröhnki
 
 ## Features
 
-- [x] i3 style splitting (vertical and horizontal)
-- [ ] Window Shifting/Movement
-- [ ] Nested container tree
-- [ ] alternative layouts
+- [x] i3-style splitting (vertical and horizontal)
+- [x] Window movement and swapping
+- [x] Nested binary-tree layout
+- [ ] Alternative layouts
   - [ ] stack
   - [ ] tabbed
 
@@ -48,7 +48,7 @@ xwaylandvideobridge,plasmashell,ksplashqml
 
 ## Installation
 
-You can install Kröhnkite in multiple ways.
+You can install Krohnkite in multiple ways.
 
 ### Using .kwinscript package file
 
@@ -120,8 +120,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for fork maintenance, syncing with the or
 
 | Key              | Action             |
 | ---------------- | ------------------ |
-| Meta + C         | Split Horizontally |
 | Meta + V         | Split Vertically   |
+| Meta + G         | Split Horizontally |
 |                  |                    |
 | Meta + .         | Focus Next         |
 | Meta + ,         | Focus Previous     |
@@ -136,14 +136,17 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for fork maintenance, syncing with the or
 | Meta + Shift + H | Move Left          |
 | Meta + Shift + L | Move Right         |
 |                  |                    |
-| Meta + I         | Increase           |
-| Meta + D         | Decrease           |
+| Meta + Alt + L      | Increase Width  |
+| Meta + Alt + H      | Decrease Width  |
+| Meta + Alt + J      | Increase Height |
+| Meta + Alt + K      | Decrease Height |
 | Meta + F         | Toggle Floating    |
-| Meta + \         | Next Layout        |
-| Meta + \|        | Previous Layout    |
 |                  |                    |
-| Meta + Return    | Set as Master      |
-|                  |                    |
+
+The bindings are registered as global KWin shortcuts and can be changed in
+`System Settings` > `Keyboard` > `Shortcuts` > `KWin`. The fork currently
+provides one binary-tree layout; layout cycling, setting a master window, and
+the old Meta mode are not available.
 
 ## Tips
 

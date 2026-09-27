@@ -124,7 +124,7 @@ Item {
 
         name: "KrohnkiteGrowHeight";
         text: "Krohnkite: Grow Height";
-        sequence: "Ctrl+Down";
+        sequence: "Meta+Alt+J";
     }
     function getShrinkHeight() {
         return shrinkHeight;
@@ -134,7 +134,7 @@ Item {
 
         name: "KrohnkiteShrinkHeight";
         text: "Krohnkite: Shrink Height";
-        sequence: "Ctrl+Up";
+        sequence: "Meta+Alt+K";
     }
     function getShrinkWidth() {
         return shrinkWidth;
@@ -144,7 +144,7 @@ Item {
 
         name: "KrohnkiteShrinkWidth";
         text: "Krohnkite: Shrink Width";
-        sequence: "Ctrl+Left";
+        sequence: "Meta+Alt+H";
     }
     function getGrowWidth() {
         return growWidth;
@@ -154,7 +154,7 @@ Item {
 
         name: "KrohnkitegrowWidth";
         text: "Krohnkite: Grow Width";
-        sequence: "Ctrl+Right";
+        sequence: "Meta+Alt+L";
     }
     function getToggleFloat() {
         return toggleFloat;
@@ -186,19 +186,6 @@ Item {
 
         name: "KrohnkiteSplitHorizontal";
         text: "Krohnkite: Split Horizontal";
-        sequence: "Meta+G"; // H is used for move left. Using G for now? Or H? Meta+G is common alternatives. Or Meta+H if move is separate.
-        // Wait, standard Vim move is HJKL.
-        // Usually i3 uses Mod+H (horizontal) and Mod+V (vertical).
-        // But Mod+H is Left.
-        // i3 default config uses:
-        // Mod+h focus left
-        // Mod+v split vertical
-        // Mod+Shift+v split horizontal (Wait no)
-        // default: Mod+h (split h) Mod+v (split v). But then what is move left?
-        // i3 default uses arrows or jkl;
-        // Mod+j left, k down, l up, ; right.
-        // Ah. Vim binding users often remap split to other keys.
-        // Let's use Meta+V for vertical. 
-        // Meta+B for Horizontal? G is good.
+        sequence: "Meta+G";
     }
 }

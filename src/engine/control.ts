@@ -70,16 +70,9 @@ class TilingController {
     window: WindowClass,
     windowRect: Rect,
   ): void {
-    // Basic drag support deactivated for strict tree mode initially
-    // Can be re-enabled if needed
   }
 
   public onWindowMoveOver(ctx: IDriverContext, window: WindowClass): void {
-    // If a tiled window was moved, we generally should re-tile it at the new position
-    // For now, let's keep it simple: if it's floating, it stays floating.
-    // If it was tiled, we might want to float it if dragged out?
-
-    /* ... float window by dragging */
     if (window.state === WindowState.Tiled) {
       const diff = window.actualGeometry.subtract(window.geometry);
       const distance = Math.sqrt(diff.x ** 2 + diff.y ** 2);
@@ -91,7 +84,6 @@ class TilingController {
       }
     }
 
-    /* ... or return to the previous position */
     window.commit();
   }
 
@@ -227,19 +219,8 @@ class TilingController {
         }
         break;
 
-      // Shortcuts for SetMaster/FloatAll/Layout cycling removed.
-
-
-      // Removed Meta, Dock, Cycle Layout shortcuts
     }
 
-    // Always arrange if action taken? 
-    // Most methods above trigger arrange or need it.
-    // simpler to call arrange if unsure, though inefficient.
-    // For now rely on specific calls inside engine or add generic arrange here?
-    // Engine methods usually return boolean or void.
-    // Let's add arrange call here for safety if we think state changed.
     this.engine.arrange(ctx, "onShortcut");
   }
 }
-

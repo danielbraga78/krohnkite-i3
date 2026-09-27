@@ -73,8 +73,8 @@ const Shortcut = {
   // Decrease: "Decrease", // Used for gaps?
 
   ToggleFloat: "ToggleFloat",
-  SplitVertical: "SplitVertical", // Meta+V
-  SplitHorizontal: "SplitHorizontal", // Meta+H
+  SplitVertical: "SplitVertical",
+  SplitHorizontal: "SplitHorizontal",
 
   // ToggleFloatAll: "ToggleFloatAll", // Removed
   // SetMaster: "SetMaster", // Removed
@@ -92,7 +92,6 @@ const Shortcut = {
 
   // KrohnkiteMeta: "KrohnkiteMeta", // Removed meta mode
 
-  /* Meta shortcuts removed for minimal build */
 } as const;
 type Shortcut = (typeof Shortcut)[keyof typeof Shortcut];
 

@@ -185,11 +185,6 @@ class TilingEngine {
   }
 
   public focusOrder(ctx: IDriverContext, step: -1 | 1) {
-    // Basic focus change in list of windows
-    // Ideally should be tree traversal
-    // But windows.getVisibleTiles returns a list.
-    // TreeLayout should probably implement directional focus or "next/prev" in visual order
-
     const window = ctx.currentWindow;
     if (window === null) {
       const tiles = this.windows.getVisibleTiles(ctx.currentSurface);
@@ -198,8 +193,6 @@ class TilingEngine {
       return;
     }
 
-    const visibles = this.windows.getVisibleWindows(ctx.currentSurface); // Or tiles?
-    // Focus cyclic in tiles list
     const tiles = this.windows.getVisibleTiles(ctx.currentSurface);
     if (tiles.length === 0) return;
 
@@ -218,10 +211,6 @@ class TilingEngine {
   }
 
   public focusDir(ctx: IDriverContext, dir: Direction): boolean {
-    // Rely on simple geometry based focus provided by KWin or implemented here?
-    // Since we removed KWinConfig options for focus, we should just use geometry.
-    // The previous implementation used getNeighborByDirection which is geometry based.
-
     const window = ctx.currentWindow;
     if (!window) return false;
 
@@ -232,22 +221,10 @@ class TilingEngine {
       return true;
     }
 
-    // Fallback to KWin's focus logic for screens/desktops?
-    // Simplified:
     return false;
   }
 
   public swapOrder(window: WindowClass, step: -1 | 1) {
-    // Moving in list might not affect tree structure if TreeLayout relies on ID persistence
-    // But TreeLayout reconciles based on Tileables list order?
-    // My TreeLayout implementation doesn't look at list order for structure, only for new windows.
-    // Logic for "Move Window" should probably manipulate the Tree.
-    // Current swapOrder effectively changes order in WindowStore. 
-    // If TreeLayout is sensitive to WindowStore order, this works.
-    // But strict Tree doesn't care about list order.
-
-    // Implementation: Move window in the Tree.
-    // For now, no-op or basic list swap.
     const srf = window.surface;
     const visibles = this.windows.getVisibleWindows(srf);
     if (visibles.length < 2) return;
